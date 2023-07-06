@@ -45,6 +45,18 @@ def notebook_cell_not_run_data():
     }
 
 
+@pytest.fixture
+def notebook_all_cell_not_run_data():
+    """Returns valid, with --allow-not-run-notebook=true, test notebook json."""
+    return {
+        "cells": [
+            {"cell_type": "code", "execution_count": None},
+            {"cell_type": "code", "execution_count": None},
+            {"cell_type": "code", "execution_count": None},
+        ]
+    }
+
+
 def test_check_notebook_run_order_valid(valid_notebook_data):
     """Tests that valid notebook data does not raise an error."""
     enforce_notebook_run_order.check_notebook_run_order(valid_notebook_data)
@@ -74,6 +86,16 @@ def test_check_notebook_run_order_cell_not_run(notebook_cell_not_run_data):
         "Cell contents: \n\n> {'cell_type': 'code', 'execution_count': None}"
     )
     assert str(error.value) == expected_error_message
+
+
+def test_check_notebook_run_order_all_cell_not_run(notebook_all_cell_not_run_data):
+    """
+    Tests that notebook with all cells not run does not raise an error,
+    with --allow-not-run-notebook=true.
+    """
+    enforce_notebook_run_order.check_notebook_run_order(
+        notebook_all_cell_not_run_data, True
+    )
 
 
 def test_notebook_is_in_virtualenv():
@@ -196,7 +218,7 @@ def test_cli_no_paths_searches_entire_dir(mocker):
     result = runner.invoke(cli)
 
     # The process_path function should be called once, with the current directory as its argument
-    mock_process_path.assert_called_once_with(".", False)
+    mock_process_path.assert_called_once_with(".", False, False)
 
     assert result.exit_code == 0
 
@@ -221,7 +243,7 @@ def test_cli_no_run_option(mocker):
 
     # The process_path function should be called once, with the current directory as its argument
     mock_process_path.assert_called_once_with(
-        "test/test_data/enforce_notebook_run_order_valid", True
+        "test/test_data/enforce_notebook_run_order_valid", True, False
     )
 
     assert result.exit_code == 0

@@ -16,7 +16,14 @@ from .enforce_notebook_run_order import process_path
     "If you use this option, you should consider moving the long-running code to a "
     "separate task that runs separately from the notebook.",
 )
-def cli(paths: List[str] = None, no_run: bool = False):
+@click.option(
+    "--allow-not-run-notebook",
+    is_flag=True,
+    help="Allow notebooks with only unrun cells to pass.",
+)
+def cli(
+    paths: List[str] = None, no_run: bool = False, allow_not_run_notebook: bool = False
+):
     """
     Checks the run order of notebooks in the specified paths,
     or the entire repo if no paths are specified
@@ -35,7 +42,7 @@ def cli(paths: List[str] = None, no_run: bool = False):
 
     if paths:
         for path in paths:
-            process_path(path, no_run)
+            process_path(path, no_run, allow_not_run_notebook)
     else:
         # If no paths are provided, check the current directory
-        process_path(".", no_run)
+        process_path(".", no_run, allow_not_run_notebook)
